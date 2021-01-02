@@ -16,7 +16,8 @@ defmodule PingServer do
         keys: :duplicate,
         name: Registry.PingServer
       ),
-      PingServer.Persist
+      PingServer.Persist,
+      {Redix, {System.get_env("REDIS_URL", "redis://127.0.0.1:6379/0"), [name: :redis]}}
     ]
 
     opts = [strategy: :one_for_one, name: PingServer.Application]
