@@ -2,7 +2,7 @@ FROM node:alpine
 
 RUN apk add elixir python build-base
 
-END MIX_HOME=/root/
+ENV MIX_HOME=/root/
 RUN mix do local.hex --force, local.rebar --force
 
 WORKDIR /app
