@@ -13,6 +13,6 @@ RUN npm install
 
 RUN npm run build
 
-RUN cd ping && mix do deps.get, deps.compile
+RUN cd ping && mix do deps.get, deps.compile, compile
 
 CMD cd ping && mix run --no-halt
