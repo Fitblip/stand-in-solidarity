@@ -7,14 +7,12 @@ defmodule PingServer.Persist do
 
   def start_link(arg) do
     :ets.new(:counters, [:public, :named_table])
-
-    case File.exists? "dets_counters" do
-      true ->
-        :dets.open_file(:dets_counters, [])
-        :dets.to_ets(:dets_counters, :counters)
-        :dets.close(:dets_counters)
-      false ->
+    case Redix.command(:redis, ["GET", "heartbeat_count"]) do
+      {:ok, nil} -> 
+        Redix.command(:redis, ["SET", "heartbeat_count", 0])
         :ets.insert(:counters, {:processed_beats, 0})
+      {:ok, number} -> 
+        :ets.insert(:counters, {:processed_beats, number |> Integer.parse |> elem(0)})
     end
 
     GenServer.start_link(__MODULE__, arg)
@@ -27,9 +25,9 @@ defmodule PingServer.Persist do
   end
 
   def handle_info(:flush_to_disk, state) do
-    :dets.open_file(:dets_counters, [])
-    :ets.to_dets(:counters, :dets_counters)
-    :dets.close(:dets_counters)
+    processed_beats = :ets.lookup(:counters, :processed_beats) |> Keyword.get(:processed_beats, 0)
+
+    Redix.command(:redis, ["SET", "heartbeat_count", processed_beats])
 
     Logger.debug("Flushed entries to disk!")
 
