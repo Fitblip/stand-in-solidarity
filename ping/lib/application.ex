@@ -3,6 +3,7 @@ defmodule PingServer do
 
   def start(_type, _args) do
     children = [
+      {Redix, {System.get_env("REDIS_URL", "redis://127.0.0.1:6379/0"), [name: :redis]}},
       Plug.Cowboy.child_spec(
         scheme: :http,
         plug: nil,
@@ -17,7 +18,6 @@ defmodule PingServer do
         name: Registry.PingServer
       ),
       PingServer.Persist,
-      {Redix, {System.get_env("REDIS_URL", "redis://127.0.0.1:6379/0"), [name: :redis]}}
     ]
 
     opts = [strategy: :one_for_one, name: PingServer.Application]
