@@ -1,6 +1,6 @@
 FROM node:alpine
 
-RUN apk add elixir python
+RUN apk add elixir python make
 
 RUN mix do local.hex --force, local.rebar --force
 
